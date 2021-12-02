@@ -4,6 +4,8 @@
 .idea/**/workspace.xml
 ### Eclipse template
 
+.idea
+Integracion.iml
 .metadata
 bin/
 tmp/
