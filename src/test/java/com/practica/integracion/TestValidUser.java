@@ -28,12 +28,9 @@ public class TestValidUser {
 	@Mock
 	private static GenericDAO mockGenericdao;
 	private SystemManager systemManager;
-
 	private User validUser = new User("1", "Pepe", "Pepeperez", "ESPAÑA", new ArrayList<Object>());
 	private static final String validId = "1";
-
 	private static final String invalidId = "2";
-
 
 	@BeforeEach
 	void setup() throws OperationNotSupportedException {
