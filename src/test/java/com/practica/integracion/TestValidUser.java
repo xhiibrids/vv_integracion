@@ -5,53 +5,70 @@ import com.practica.integracion.DAO.GenericDAO;
 import com.practica.integracion.DAO.User;
 import com.practica.integracion.manager.SystemManager;
 import com.practica.integracion.manager.SystemManagerException;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import 	org.junit.jupiter.api.Assertions;
+
 import javax.naming.OperationNotSupportedException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TestValidUser {
+class TestValidUser {
 
-	@Mock
-	private static AuthDAO mockAuthdao;
+    private static final String validId = "1";
+    private static final String invalidId = "2";
+    @Mock
+    private static AuthDAO mockAuthDao;
+    @Mock
+    private static GenericDAO mockGenericDao;
+    private SystemManager systemManager;
+    private final User validUser = new User("1", "Pepe", "Pepeperez", "ESPAÑA", new ArrayList<>());
+    private InOrder inOrder;
 
-	@Mock
-	private static GenericDAO mockGenericdao;
-	private SystemManager systemManager;
-	private User validUser = new User("1", "Pepe", "Pepeperez", "ESPAÑA", new ArrayList<Object>());
-	private static final String validId = "1";
-	private static final String invalidId = "2";
+    @BeforeEach
+    void setup() {
+        systemManager = new SystemManager(mockAuthDao, mockGenericDao);
+        when(mockAuthDao.getAuthData(validId)).thenReturn(validUser);
+        inOrder = Mockito.inOrder(mockAuthDao, mockGenericDao);
+    }
 
-	@BeforeEach
-	void setup() throws OperationNotSupportedException {
-		systemManager = new SystemManager(mockAuthdao, mockGenericdao);
-		when(mockAuthdao.getAuthData(validId)).thenReturn(validUser);
+    @Test
+    void testStartRemoteSystemValidId() throws SystemManagerException, OperationNotSupportedException {
+        when(mockGenericDao.getSomeData(validUser, "where id=" + validId)).thenReturn(new ArrayList<>());
+        Assertions.assertEquals(systemManager.startRemoteSystem(validId, validId), new ArrayList<>());
+        inOrder.verify(mockAuthDao).getAuthData(validId);
+        inOrder.verify(mockGenericDao).getSomeData(validUser, "where id=" + validId);
+    }
 
+    @Test
+    void testStartRemoteSystemInvalidId() throws OperationNotSupportedException {
+        when(mockGenericDao.getSomeData(validUser, "where id=" + invalidId)).thenThrow(new OperationNotSupportedException());
+        Assertions.assertThrows(SystemManagerException.class, () -> systemManager.startRemoteSystem(validId, invalidId));
+        inOrder.verify(mockAuthDao).getAuthData(validId);
+        inOrder.verify(mockGenericDao).getSomeData(validUser, "where id=" + invalidId);
+    }
 
-	}
+    @Test
+    void testStopRemoteSystemValidId() throws OperationNotSupportedException, SystemManagerException {
+        when(mockGenericDao.getSomeData(validUser, "where id=" + validId)).thenReturn(new ArrayList<>());
+        Assertions.assertEquals(systemManager.stopRemoteSystem(validId, validId), new ArrayList<>());
+        inOrder.verify(mockAuthDao).getAuthData(validId);
+        inOrder.verify(mockGenericDao).getSomeData(validUser, "where id=" + validId);
+    }
 
-	@Test
-	void testStartremotesystemvalidId() throws SystemManagerException, OperationNotSupportedException {
-		when(mockGenericdao.getSomeData(validUser, "where id="+validId)).thenReturn(new ArrayList<Object>());
-		Assertions.assertEquals(systemManager.startRemoteSystem(validId, validId), new ArrayList<Object>());
-
-	}
-
-	@Test
-	void testStartremotesystemInvalidId() throws SystemManagerException, OperationNotSupportedException {
-		when(mockGenericdao.getSomeData(validUser, "where id="+ invalidId)).thenThrow(new OperationNotSupportedException());
-		Assertions.assertThrows(SystemManagerException.class, () -> systemManager.startRemoteSystem(validId,invalidId) );
-
-	}
+    @Test
+    void testStopRemoteSystemInvalidId() throws OperationNotSupportedException {
+        when(mockGenericDao.getSomeData(validUser, "where id=" + invalidId)).thenThrow(new OperationNotSupportedException());
+        Assertions.assertThrows(SystemManagerException.class, () -> systemManager.stopRemoteSystem(validId, invalidId));
+        inOrder.verify(mockAuthDao).getAuthData(validId);
+        inOrder.verify(mockGenericDao).getSomeData(validUser, "where id=" + invalidId);
+    }
 
 }
