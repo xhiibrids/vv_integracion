@@ -13,6 +13,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+
 class TestValidUser {
 
     private static final String validId = "1";
@@ -72,19 +76,20 @@ class TestValidUser {
     }
     @Test
     void testDeleteRemoteSystemValidId() throws OperationNotSupportedException,SystemManagerException{
-        when(mockGenericDao.deleteSomeData(validUser,validId)).thenReturn(true);
-        systemManager.deleteRemoteSystem(validId,validId);
-        inOrder.verify(mockGenericDao).deleteSomeData(validUser,validId);
+
+        when(mockGenericDao.deleteSomeData(any(User.class),eq(validId))).thenReturn(Boolean.TRUE);
+        systemManager.deleteRemoteSystem("1",validId);
+        inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(validId));
 
     }
 
     @Test
     void testDeleteRemoteSystemInvalidId() throws OperationNotSupportedException {
-        when(mockGenericDao.deleteSomeData(validUser, invalidId)).thenReturn(false);
+        when(mockGenericDao.deleteSomeData(any(User.class),eq(invalidId))).thenReturn(Boolean.FALSE);
 
         Assertions.assertThrows(SystemManagerException.class,
-                () -> systemManager.deleteRemoteSystem(validId, invalidId));
-        inOrder.verify(mockGenericDao).deleteSomeData(validUser,invalidId);
+                () -> systemManager.deleteRemoteSystem("1", invalidId));
+        inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(invalidId));
 
     }
 
