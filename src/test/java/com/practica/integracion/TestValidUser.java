@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.naming.OperationNotSupportedException;
 import java.util.ArrayList;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TestValidUser {
@@ -69,6 +69,23 @@ class TestValidUser {
         Assertions.assertThrows(SystemManagerException.class, () -> systemManager.stopRemoteSystem(validId, invalidId));
         inOrder.verify(mockAuthDao).getAuthData(validId);
         inOrder.verify(mockGenericDao).getSomeData(validUser, "where id=" + invalidId);
+    }
+    @Test
+    void testDeleteRemoteSystemValidId() throws OperationNotSupportedException,SystemManagerException{
+        when(mockGenericDao.deleteSomeData(validUser,validId)).thenReturn(true);
+        systemManager.deleteRemoteSystem(validId,validId);
+        inOrder.verify(mockGenericDao).deleteSomeData(validUser,validId);
+
+    }
+
+    @Test
+    void testDeleteRemoteSystemInvalidId() throws OperationNotSupportedException {
+        when(mockGenericDao.deleteSomeData(validUser, invalidId)).thenReturn(false);
+
+        Assertions.assertThrows(SystemManagerException.class,
+                () -> systemManager.deleteRemoteSystem(validId, invalidId));
+        inOrder.verify(mockGenericDao).deleteSomeData(validUser,invalidId);
+
     }
 
 }
