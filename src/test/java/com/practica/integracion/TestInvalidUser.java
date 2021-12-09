@@ -2,6 +2,7 @@ package com.practica.integracion;
 
 import com.practica.integracion.DAO.AuthDAO;
 import com.practica.integracion.DAO.GenericDAO;
+import com.practica.integracion.DAO.User;
 import com.practica.integracion.manager.SystemManager;
 import com.practica.integracion.manager.SystemManagerException;
 import org.junit.jupiter.api.Assertions;
@@ -12,12 +13,18 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import javax.naming.OperationNotSupportedException;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class TestInvalidUser {
     @Mock
     private AuthDAO mockAuthDao;
@@ -69,7 +76,24 @@ class TestInvalidUser {
         inOrder.verify(mockAuthDao).getAuthData(invalidId);
         inOrder.verify(mockGenericDao).getSomeData(null, "where id=" + invalidId);
     }
+    @Test
+    void testDeleteRemoteSystemValidId() throws OperationNotSupportedException{
 
+        when(mockGenericDao.deleteSomeData(any(User.class),eq(validId))).thenReturn(Boolean.FALSE);
+        Assertions.assertThrows(SystemManagerException.class,()->systemManager.deleteRemoteSystem(invalidId,validId));
+        inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(validId));
+
+    }
+
+    @Test
+    void testDeleteRemoteSystemInvalidId() throws OperationNotSupportedException {
+        when(mockGenericDao.deleteSomeData(any(User.class),eq(invalidId))).thenReturn(Boolean.FALSE);
+
+        Assertions.assertThrows(SystemManagerException.class,
+                () -> systemManager.deleteRemoteSystem(invalidId, invalidId));
+        inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(invalidId));
+
+    }
 
 
 }
