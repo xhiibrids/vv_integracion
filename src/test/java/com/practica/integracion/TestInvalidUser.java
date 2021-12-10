@@ -52,15 +52,6 @@ class TestInvalidUser {
         inOrder.verify(mockGenericDao).getSomeData(null, "where id=" + validId);
     }
 
-
-    @Test
-    void testStartRemoteSystemInvalidId() throws OperationNotSupportedException {
-        when(mockGenericDao.getSomeData(null, "where id=" + invalidId)).thenThrow(new OperationNotSupportedException());
-        Assertions.assertThrows(SystemManagerException.class, () -> systemManager.startRemoteSystem(invalidId, invalidId));
-        inOrder.verify(mockAuthDao).getAuthData(invalidId);
-        inOrder.verify(mockGenericDao).getSomeData(null, "where id=" + invalidId);
-    }
-
     @Test
     void testStopRemoteSystemValidId() throws OperationNotSupportedException {
         when(mockGenericDao.getSomeData(null, "where id=" + validId)).thenThrow(new OperationNotSupportedException());
@@ -69,13 +60,6 @@ class TestInvalidUser {
         inOrder.verify(mockGenericDao).getSomeData(null, "where id=" + validId);
     }
 
-    @Test
-    void testStopRemoteSystemInvalidId() throws OperationNotSupportedException {
-        when(mockGenericDao.getSomeData(null, "where id=" + invalidId)).thenThrow(new OperationNotSupportedException());
-        Assertions.assertThrows(SystemManagerException.class, () -> systemManager.stopRemoteSystem(invalidId, invalidId));
-        inOrder.verify(mockAuthDao).getAuthData(invalidId);
-        inOrder.verify(mockGenericDao).getSomeData(null, "where id=" + invalidId);
-    }
     @Test
     void testDeleteRemoteSystemValidId() throws OperationNotSupportedException{
 
