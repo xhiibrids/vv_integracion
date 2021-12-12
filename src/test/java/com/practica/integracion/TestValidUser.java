@@ -90,7 +90,17 @@ class TestValidUser {
         Assertions.assertThrows(SystemManagerException.class,
                 () -> systemManager.deleteRemoteSystem("1", invalidId));
         inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(invalidId));
+    }
 
+    @Test
+    void addRemoteSystemValidInput() throws OperationNotSupportedException, SystemManagerException {
+        when(mockAuthDao.getAuthData(validId)).thenReturn(validUser);
+        when(mockGenericDao.updateSomeData(validUser, null)).thenReturn(true);
+        InOrder inOrder = Mockito.inOrder(mockAuthDao, mockGenericDao);
+        systemManager.addRemoteSystem(validId, null);
+
+        inOrder.verify(mockAuthDao).getAuthData(validId);
+        inOrder.verify(mockGenericDao).updateSomeData(validUser, null);
     }
 
 }

@@ -17,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import javax.naming.OperationNotSupportedException;
 
+import java.util.Collections;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -34,6 +36,7 @@ class TestInvalidUser {
     private SystemManager systemManager;
     private static final String invalidId = "2";
     private static final String validId = "1";
+    private static final User USR = new User("1", "ttt", "ttt", "ttt", Collections.emptyList());
     private InOrder inOrder;
 
 
@@ -76,7 +79,33 @@ class TestInvalidUser {
         Assertions.assertThrows(SystemManagerException.class,
                 () -> systemManager.deleteRemoteSystem(invalidId, invalidId));
         inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(invalidId));
+    }
 
+    @Test
+    void addRemoteSystemDataUpdateFail() throws OperationNotSupportedException {
+        when(mockAuthDao.getAuthData(validId)).thenReturn(USR);
+        when(mockGenericDao.updateSomeData(USR, null)).thenReturn(false);
+        InOrder inOrder = Mockito.inOrder(mockAuthDao, mockGenericDao);
+
+        Assertions.assertThrows(SystemManagerException.class,
+                () -> systemManager.addRemoteSystem(validId, null));
+
+        inOrder.verify(mockAuthDao).getAuthData(validId);
+        inOrder.verify(mockGenericDao).updateSomeData(USR, null);
+    }
+
+    @Test
+    void addRemoteSystemInvalidAuth() throws OperationNotSupportedException {
+        when(mockAuthDao.getAuthData(invalidId)).thenReturn(null);
+        when(mockGenericDao.updateSomeData(null, null))
+                .thenThrow(new OperationNotSupportedException("Usuario inválido"));
+        InOrder inOrder = Mockito.inOrder(mockAuthDao, mockGenericDao);
+
+        Assertions.assertThrows(SystemManagerException.class,
+                () -> systemManager.addRemoteSystem(invalidId, null));
+
+        inOrder.verify(mockAuthDao).getAuthData(invalidId);
+        inOrder.verify(mockGenericDao).updateSomeData(null, null);
     }
 
 
