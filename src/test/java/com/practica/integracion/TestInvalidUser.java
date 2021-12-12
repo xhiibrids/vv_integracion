@@ -66,20 +66,13 @@ class TestInvalidUser {
     @Test
     void testDeleteRemoteSystemValidId() throws OperationNotSupportedException{
 
-        when(mockGenericDao.deleteSomeData(any(User.class),eq(validId))).thenReturn(Boolean.FALSE);
+        when(mockGenericDao.deleteSomeData(any(User.class),eq(validId))).thenThrow(new OperationNotSupportedException());
         Assertions.assertThrows(SystemManagerException.class,()->systemManager.deleteRemoteSystem(invalidId,validId));
         inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(validId));
 
     }
 
-    @Test
-    void testDeleteRemoteSystemInvalidId() throws OperationNotSupportedException {
-        when(mockGenericDao.deleteSomeData(any(User.class),eq(invalidId))).thenReturn(Boolean.FALSE);
 
-        Assertions.assertThrows(SystemManagerException.class,
-                () -> systemManager.deleteRemoteSystem(invalidId, invalidId));
-        inOrder.verify(mockGenericDao).deleteSomeData(any(User.class),eq(invalidId));
-    }
 
     @Test
     void addRemoteSystemDataUpdateFail() throws OperationNotSupportedException {
